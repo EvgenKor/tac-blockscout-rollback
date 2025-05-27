@@ -1,7 +1,7 @@
 {
     "name": "tac_blockscout_rollback",
-    "version": "1.0.0",
-    "description": "",
+    "version": "1.1.0",
+    "description": "TAC Rollback Operation Producer Script",
     "main": "index.js",
     "scripts": {
         "build": "tsc",
@@ -11,7 +11,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@tonappchain/sdk": "^0.5.7",
+        "@tonappchain/sdk": "0.6.1-v3.0.4",
         "dotenv": "^16.5.0",
         "ethers": "^6.14.0"
     },

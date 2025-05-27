@@ -1,8 +1,10 @@
 import 'dotenv/config';
-import { AssetBridgingData, EvmProxyMsg, Network, SDKParams, SenderFactory, startTracking, TacSdk, WalletVersion } from '@tonappchain/sdk';
+import { AssetBridgingData, AssetType, EvmProxyMsg, Network, SDKParams,
+        SenderFactory, startTracking, TacSdk, WalletVersion 
+    } from '@tonappchain/sdk';
 import { ethers } from 'ethers';
 
-const TEST_PROXY = "0x015CC7bb329f28C6Cd0F2A119D32667966f97d15";
+const TEST_PROXY = "0x82B77f70f5C8f9147d5Db758DEcE8d7A38415aEa";
 const TON_JETTON_ADDRESS = process.env.TON_JETTON_ADDRESS || "EQBLi0v_y-KiLlT1VzQJmmMbaoZnLcMAHrIEmzur13dwOmM1";
 const amountA = 1;
 
@@ -19,9 +21,9 @@ async function rollback() {
     };
     const tacSdk = await TacSdk.create(sdkParams);
 
-    const EVM_TKA_ADDRESS = await tacSdk.getEVMTokenAddress(TON_JETTON_ADDRESS);
+    const EVM_JETTON_ADDRESS = await tacSdk.getEVMTokenAddress(TON_JETTON_ADDRESS);
     console.log("TVM JETTON ADDRESS: %s", TON_JETTON_ADDRESS);
-    console.log("EVM  TKA   ADDRESS: %s", EVM_TKA_ADDRESS);
+    console.log("EVM JETTON ADDRESS: %s", EVM_JETTON_ADDRESS);
 
     const abi = new ethers.AbiCoder();
     const encodedParameters = abi.encode(['string'], [`blockscout_error`]);
@@ -43,23 +45,30 @@ async function rollback() {
         {
             address: TON_JETTON_ADDRESS,
             amount: amountA,
+            type: AssetType.FT,
         },
     ];
 
     console.log("-------------------------------------------------------------------");
-    return await tacSdk.sendCrossChainTransaction(evmProxyMsg, sender, jettons, true);
+    return await tacSdk.sendCrossChainTransaction(evmProxyMsg, sender, jettons, {
+        forceSend: true,
+        isRoundTrip: true,
+        evmExecutorFee: 1_000_000_000n,
+        tvmExecutorFee: 1_000_000_000n,
+
+    });
 }
 
 async function main() {
     try {
         // send transaction
         const result = await rollback();
-        console.log('Transaction successful:', result);
+        console.log('Transaction successful: ', result);
 
         // start tracking transaction status
         await startTracking(result, Network.TESTNET);
     } catch (error) {
-        console.error('Error during transaction:', error);
+        console.error('Error during transaction: ', error);
     }
 }
 
